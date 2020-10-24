@@ -1,16 +1,42 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
+
+
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <netdb.h>
+
 #include <signal.h>
 #include <fcntl.h>
 #include <stdbool.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <pthread.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+void *client_handler(void *arg)
+{
+
+    char buf[80];
+    time_t ticks;
+
+    int sockfd;
+
+    sockfd = *(int *)arg;
+
+    /* Send time to client */
+    ticks = time(NULL);
+    snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&ticks));
+    write(sockfd, buf, strlen(buf));
+
+    close(sockfd);
+
+}
 
 int main(int argc, char **argv)
 {
