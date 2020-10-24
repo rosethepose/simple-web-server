@@ -1,34 +1,80 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<sys/types.h>
-#include<sys/stat.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<netdb.h>
-#include<signal.h>
-#include<fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <stdbool.h>
 
-void serve(const char* name, int port)
+
+int main(int argc, char **argv)
 {
 
-}
+   const int backlog = 5;
 
-int main(int argc, char const **argv)
-{
-    const char* name = argv[1];
-    int port = atoi(argv[2]);
-    //check port number is valid
-    if (port < 65536 && port > 1024)
-    {
-        //continue
-        serve(name, port);
-    }
-    else
-    {
-        printf("invalid port id:%d\n", port);
-        return 1;
-    }
-    return 0;
+   struct  sockaddr_in  server_addr;
+   struct  sockaddr_in  client_addr;
+   pthread_t tid;
+
+   int sockfd, client_sockfd;
+   int serverlen, clientlen;
+
+
+   if (argc != 3)
+   {
+       printf("Usage: %s <ip-address> <port> \n", argv[0]);
+       return -1;
+   }
+
+   /* Create the socket */
+   sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   if (sockfd == -1)
+   {
+       perror("Could not create socket");
+       return -1;
+   }
+
+   /* Name the socket */
+   server_addr.sin_family = AF_INET;
+   server_addr.sin_addr.s_addr = inet_addr(argv[1]);
+   server_addr.sin_port = htons(atoi(argv[2]));
+
+   /* bind to server socket */
+   if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) != 0)
+   {
+       perror("Could not bind to socket");
+       close(sockfd);
+       return -1;
+   }
+
+   /* wait for client to connect */
+   listen(sockfd, backlog);
+
+   while (true)
+   {
+
+       /* Accept a connection */
+       clientlen = sizeof(client_addr);
+       client_sockfd = accept(sockfd, (struct sockaddr *)&client_addr, &clientlen);
+       if (client_sockfd == -1) {
+           perror("Unable to accept client connection request");
+           continue;
+       }
+
+       if (pthread_create(&tid, NULL, client_handler, (void *)&client_sockfd) < 0) {
+           perror("Unable to create client thread");
+           break;
+       }
+
+   }
+
+   close(sockfd);
+
+   return 0;
+
 }
