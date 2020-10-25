@@ -51,19 +51,21 @@ void *client_handler(void *arg)
     char* w;
     w =  malloc(256);
 
-    char* b;
-    b = malloc(4096);
 
-    write(sockfd, "HTTP/1.1 200 OK\r\n", 17);
+    write(sockfd, "HTTP/1.1 200 OK\n\n", 17);
     while (read(fd,w,256)>0)
     {
+        printf("%s\n", w);
         write(sockfd, w, 256);
     }
-    write(sockfd, "\r\n\0", 3);
+    write(sockfd, "\n\n\0", 3);
     //snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&ticks));
 
 
     close(sockfd);
+    close(fd);
+    free(buf);
+    free(w);
 
 }
 
