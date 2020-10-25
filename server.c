@@ -19,20 +19,30 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define MAX_REQ_BYTES 128
+
 void *client_handler(void *arg)
 {
-
-    char buf[80];
-    time_t ticks;
-
     int sockfd;
 
     sockfd = *(int *)arg;
 
+    char* buf;
+    buf = malloc(MAX_REQ_BYTES);
+
+    int n = read(sockfd, buf, MAX_REQ_BYTES);
+    if (n < 0)
+    {
+        perror("Could not read from socket");
+    }
+    buf[n] = '\0';
+    printf("%s\n", buf);
+
+
+    char* w = "HTTP/1.1 200 OK\r\n<!DOCTYPE html><html><body><h1>My First Heading</h1><p>My first paragraph.</p></body></html>\r\n";
     /* Send time to client */
-    ticks = time(NULL);
-    snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&ticks));
-    write(sockfd, buf, strlen(buf));
+    //snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&ticks));
+    write(sockfd, w, strlen(w));
 
     close(sockfd);
 
@@ -87,12 +97,14 @@ int main(int argc, char **argv)
        /* Accept a connection */
        clientlen = sizeof(client_addr);
        client_sockfd = accept(sockfd, (struct sockaddr *)&client_addr, &clientlen);
-       if (client_sockfd == -1) {
+       if (client_sockfd == -1)
+       {
            perror("Unable to accept client connection request");
            continue;
        }
 
-       if (pthread_create(&tid, NULL, client_handler, (void *)&client_sockfd) < 0) {
+       if (pthread_create(&tid, NULL, client_handler, (void *)&client_sockfd) < 0)
+       {
            perror("Unable to create client thread");
            break;
        }
