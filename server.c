@@ -38,11 +38,30 @@ void *client_handler(void *arg)
     buf[n] = '\0';
     printf("%s\n", buf);
 
+    strtok(buf, " ");
+    char* filename = strtok(NULL, " ");
+    if (strcmp(filename, "/")==0)
+    {
+        strcpy(filename, "index.html");
+    }
 
-    char* w = "HTTP/1.1 200 OK\r\n<!DOCTYPE html><html><body><h1>My First Heading</h1><p>My first paragraph.</p></body></html>\r\n";
-    /* Send time to client */
+    int fd = open(filename, O_RDONLY);
+    printf("name:%s\nid:%d\n", filename, fd);
+
+    char* w;
+    w =  malloc(256);
+
+    char* b;
+    b = malloc(4096);
+
+    write(sockfd, "HTTP/1.1 200 OK\r\n", 17);
+    while (read(fd,w,256)>0)
+    {
+        write(sockfd, w, 256);
+    }
+    write(sockfd, "\0", 1);
     //snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&ticks));
-    write(sockfd, w, strlen(w));
+
 
     close(sockfd);
 
