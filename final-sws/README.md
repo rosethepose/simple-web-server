@@ -1,4 +1,9 @@
 # simple-web-server
+Name: Davis Carmichael, Rose Ramirez
+Student ID: 2328047
+Email: carmicahel@chapman.edu
+Course: CPSC380-01 Fall 2020
+Assignment: simple web server
 
 
 Sources:  
