@@ -59,7 +59,7 @@ void *client_handler(void *arg)
     {
         write(sockfd, w, 256);
     }
-    write(sockfd, "\0", 1);
+    write(sockfd, "\r\n\0", 3);
     //snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&ticks));
 
 
